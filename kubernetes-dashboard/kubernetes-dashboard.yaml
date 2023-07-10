@@ -1,0 +1,30 @@
+---
+# Namespace `kubernetes-dashboard` の作成
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubernetes-dashboard
+
+---
+# ServiceAccount `admin` の作成
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin
+  namespace: kubernetes-dashboard
+
+---
+# ServiceAccount `admin` を `cluster-admin` に紐付ける
+# これは Namespace `kubernetes-dashboard` には作られない
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: binding-cluster-admin-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: admin
+    namespace: kubernetes-dashboard
