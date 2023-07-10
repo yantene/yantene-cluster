@@ -1,0 +1,6 @@
+---
+# Namespace `cert-manager` の作成
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
