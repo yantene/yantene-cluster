@@ -1,18 +1,30 @@
 # static
 
-`static` 名前空間を作成。
+## リソースの作成
+
+以下のリソースを作成する。
+
+- Namespace `static`
+- Deployment `nginx`
+- Service `nginx-service`
+- Ingress `ingress-traefik`
 
 ```
-$ kubectl apply -f ./namespace.yaml
-namespace/static created
+$ kubectl apply -f ./static.yaml
 ```
 
-`traefik` をインストール。
+## Traefik のインストール
+
+リポジトリの追加。
 
 ```
 $ helm repo add traefik https://traefik.github.io/charts
 "traefik" has been added to your repositories
+```
 
+Traefik のインストール。
+
+```
 $ helm install -n static traefik traefik/traefik
 NAME: traefik
 LAST DEPLOYED: Sat Jul  1 18:00:56 2023
@@ -24,28 +36,18 @@ NOTES:
 Traefik Proxy v2.10.1 has been deployed successfully on static namespace !
 ```
 
+## DNS レコードの設定
+
 `traefik` の EXTERNAL-IP を確認（Vultr の Load Balancer の IP アドレス）。
 
 ```
 $ kubectl -n static get service
-NAME            TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE
-traefik         LoadBalancer   10.99.211.72    167.179.118.83   80:30770/TCP,443:32299/TCP   7m29s
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)                      AGE
+nginx-service   ClusterIP      10.111.106.211   <none>           80/TCP                       5m12s
+traefik         LoadBalancer   10.103.206.83    167.179.111.41   80:31997/TCP,443:31489/TCP   4m46s
 ```
 
 `static.yantene.net` の A レコードをこれに向けておく。
-
-`nginx` deployment と service を作成。
-
-```
-kubectl -n static apply -f ./nginx.yaml
-kubectl -n static apply -f ./nginx-service.yaml
-```
-
-`ingress-traefik` ingress を作成。
-
-```
-kubectl -n static apply -f ./ingress-traefik.yaml
-```
 
 ## 参考リンク
 

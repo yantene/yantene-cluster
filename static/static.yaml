@@ -1,0 +1,74 @@
+---
+# Namespace `static` の作成
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: static
+
+---
+# Deployment `nginx` の作成
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: static
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.24.0-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+---
+# Service `nginx-service` の作成
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: static
+  labels:
+    app: nginx
+spec:
+  type: ClusterIP # only in cluster
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: nginx
+
+---
+# Ingress `ingress-traefik` の作成
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-traefik
+  namespace: static
+spec:
+  rules:
+    - host: static.yantene.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
