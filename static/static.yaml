@@ -60,6 +60,8 @@ kind: Ingress
 metadata:
   name: ingress-traefik
   namespace: static
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
 spec:
   rules:
     - host: static.yantene.net
@@ -72,3 +74,22 @@ spec:
                 name: nginx-service
                 port:
                   number: 80
+  tls:
+    - hosts:
+        - static.yantene.net
+      secretName: static-certificate-secret
+
+---
+# Certificate `static-certificate` の作成
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: static-certificate
+  namespace: static
+spec:
+  secretName: static-certificate-secret
+  dnsNames:
+    - static.yantene.net
+  issuerRef:
+    name: lets-encrypt
+    kind: ClusterIssuer
