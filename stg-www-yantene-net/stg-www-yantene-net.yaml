@@ -1,0 +1,95 @@
+---
+# Namespace `stg-www-yantene-net` の作成
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stg-www-yantene-net
+
+---
+# Deployment `www-yantene-net` の作成
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: www-yantene-net
+  namespace: stg-www-yantene-net
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: www-yantene-net
+  template:
+    metadata:
+      labels:
+        app: www-yantene-net
+    spec:
+      containers:
+        - name: www-yantene-net
+          image: ghcr.io/yantene/www.yantene.net:staging-latest
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+---
+# Service `www-yantene-net-service` の作成
+apiVersion: v1
+kind: Service
+metadata:
+  name: www-yantene-net-service
+  namespace: stg-www-yantene-net
+  labels:
+    app: www-yantene-net
+spec:
+  type: ClusterIP # only in cluster
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: www-yantene-net
+
+---
+# Ingress `ingress-traefik` の作成
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-traefik
+  namespace: stg-www-yantene-net
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  rules:
+    - host: stg-www.yantene.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: www-yantene-net-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - stg-www.yantene.net
+      secretName: stg-www-yantene-net-certificate-secret
+
+---
+# Certificate `stg-www-yantene-net-certificate` の作成
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stg-www-yantene-net-certificate
+  namespace: stg-www-yantene-net
+spec:
+  secretName: stg-www-yantene-net-certificate-secret
+  dnsNames:
+    - stg-www.yantene.net
+  issuerRef:
+    name: lets-encrypt
+    kind: ClusterIssuer

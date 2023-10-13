@@ -43,7 +43,7 @@ NAME      TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)               
 traefik   LoadBalancer   10.105.129.20   167.179.111.97   80:32577/TCP,443:30108/TCP   72m
 ```
 
-`static.yantene.net` の A レコードをこれに向けておく。
+`static.yantene.net` など使用するドメイン名の A レコードをこれに向けておく。
 
 ## 参考リンク
 
